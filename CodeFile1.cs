@@ -1,98 +1,84 @@
 ﻿using System;
 
-// Абстрактна база для трансформацій
-abstract class Transformation
+// Абстрактні класи для студентів і викладачів
+abstract class Student
 {
-    public abstract void SetNumbers(int a11, int a12, int a13, int a21, int a22, int a23);
-    public abstract void Math(int x, int y, int z = 0);
+    public abstract void Study();
 }
 
-// Будівельник для 3D трансформацій
-class TransformationBuilder
+abstract class Teacher
 {
-    private int a11, a12, a13, a21, a22, a23;
-    private int a14, a24, a31, a32, a33, a34;
+    public abstract void Teach();
+}
 
-    public TransformationBuilder Set2DNumbers(int a11, int a12, int a13, int a21, int a22, int a23)
+// Абстрактна фабрика для створення студентів та викладачів
+abstract class EducationFactory
+{
+    public abstract Student CreateStudent();
+    public abstract Teacher CreateTeacher();
+}
+
+// Конкретна фабрика для ВНЗ
+class UniversityFactory : EducationFactory
+{
+    public override Student CreateStudent()
     {
-        this.a11 = a11;
-        this.a12 = a12;
-        this.a13 = a13;
-        this.a21 = a21;
-        this.a22 = a22;
-        this.a23 = a23;
-        return this;
+        return new UniversityStudent();
     }
 
-    public TransformationBuilder Set3DNumbers(int a14, int a24, int a31, int a32, int a33, int a34)
+    public override Teacher CreateTeacher()
     {
-        this.a14 = a14;
-        this.a24 = a24;
-        this.a31 = a31;
-        this.a32 = a32;
-        this.a33 = a33;
-        this.a34 = a34;
-        return this;
-    }
-
-    public Transformation Build()
-    {
-        return new T3D(a11, a12, a13, a21, a22, a23, a14, a24, a31, a32, a33, a34);
+        return new UniversityTeacher();
     }
 }
 
-// Реалізація 2D трансформації
-class T2D : Transformation
+// Конкретна фабрика для військової академії
+class MilitaryAcademyFactory : EducationFactory
 {
-    protected int a11, a12, a13, a21, a22, a23;
-
-    public override void SetNumbers(int a11, int a12, int a13, int a21, int a22, int a23)
+    public override Student CreateStudent()
     {
-        this.a11 = a11;
-        this.a12 = a12;
-        this.a13 = a13;
-        this.a21 = a21;
-        this.a22 = a22;
-        this.a23 = a23;
+        return new MilitaryAcademyStudent();
     }
 
-    public override void Math(int x, int y, int z = 0)
+    public override Teacher CreateTeacher()
     {
-        int tempx = a11 * x + a12 * y + a13;
-        int tempy = a21 * x + a22 * y + a23;
-        Console.WriteLine($"Результат 2D: x = {tempx}, y = {tempy}");
+        return new MilitaryAcademyTeacher();
     }
 }
 
-// Реалізація 3D трансформації
-class T3D : T2D
+// Конкретний студент для ВНЗ
+class UniversityStudent : Student
 {
-    private int a14, a24, a31, a32, a33, a34;
-
-    public T3D(int a11, int a12, int a13, int a21, int a22, int a23, int a14, int a24, int a31, int a32, int a33, int a34)
+    public override void Study()
     {
-        SetNumbers(a11, a12, a13, a21, a22, a23);
-        this.a14 = a14;
-        this.a24 = a24;
-        this.a31 = a31;
-        this.a32 = a32;
-        this.a33 = a33;
-        this.a34 = a34;
+        Console.WriteLine("Студент ВНЗ навчається теоретично.");
     }
+}
 
-    public override void Math(int x, int y, int z = 0)
+// Конкретний студент для військової академії
+class MilitaryAcademyStudent : Student
+{
+    public override void Study()
     {
-        if (z == 0)
-        {
-            base.Math(x, y); // Викликаємо метод для 2D
-        }
-        else
-        {
-            int tempx = a11 * x + a12 * y + a13 * z + a14;
-            int tempy = a21 * x + a22 * y + a23 * z + a24;
-            int tempz = a31 * x + a32 * y + a33 * z + a34;
-            Console.WriteLine($"Результат 3D: x = {tempx}, y = {tempy}, z = {tempz}");
-        }
+        Console.WriteLine("Студент військової академії проходить практичні тренування та дисциплінарні навчання.");
+    }
+}
+
+// Конкретний викладач для ВНЗ
+class UniversityTeacher : Teacher
+{
+    public override void Teach()
+    {
+        Console.WriteLine("Викладач ВНЗ проводить лекції з теорії.");
+    }
+}
+
+// Конкретний викладач для військової академії
+class MilitaryAcademyTeacher : Teacher
+{
+    public override void Teach()
+    {
+        Console.WriteLine("Викладач військової академії проводить тренування та бойові підготовки.");
     }
 }
 
@@ -100,56 +86,31 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Перевірка остачі від ділення на 3 для варіанту 25
-        int choice = 25;
+        Console.WriteLine("Оберіть тип навчального закладу (1 - ВНЗ, 2 - Військова академія):");
+        int choice = int.Parse(Console.ReadLine());
 
-        if (choice % 3 == 1) // Будівельник
+        EducationFactory factory;
+
+        if (choice == 1)
         {
-            Console.WriteLine("Будівельник трансформацій 3D");
-
-            // Використовуємо будівельник
-            TransformationBuilder builder = new TransformationBuilder();
-
-            // Попросимо користувача ввести значення для 2D та 3D
-            Console.WriteLine("Введіть параметри для 2D трансформації (a11, a12, a13, a21, a22, a23):");
-            int a11 = int.Parse(Console.ReadLine());
-            int a12 = int.Parse(Console.ReadLine());
-            int a13 = int.Parse(Console.ReadLine());
-            int a21 = int.Parse(Console.ReadLine());
-            int a22 = int.Parse(Console.ReadLine());
-            int a23 = int.Parse(Console.ReadLine());
-
-            Console.WriteLine("Введіть параметри для 3D трансформації (a14, a24, a31, a32, a33, a34):");
-            int a14 = int.Parse(Console.ReadLine());
-            int a24 = int.Parse(Console.ReadLine());
-            int a31 = int.Parse(Console.ReadLine());
-            int a32 = int.Parse(Console.ReadLine());
-            int a33 = int.Parse(Console.ReadLine());
-            int a34 = int.Parse(Console.ReadLine());
-
-            builder.Set2DNumbers(a11, a12, a13, a21, a22, a23)
-                   .Set3DNumbers(a14, a24, a31, a32, a33, a34);
-
-            Transformation transformation = builder.Build();
-
-            // Введення координат для Math
-            Console.WriteLine("Введіть координати:");
-            try
-            {
-                int x = int.Parse(Console.ReadLine());
-                int y = int.Parse(Console.ReadLine());
-                int z = int.Parse(Console.ReadLine());
-
-                transformation.Math(x, y, z); // Виклик для 3D
-            }
-            catch (FormatException)
-            {
-                Console.WriteLine("Помилка вводу! Введіть числа.");
-            }
+            factory = new UniversityFactory();
+        }
+        else if (choice == 2)
+        {
+            factory = new MilitaryAcademyFactory();
         }
         else
         {
-            Console.WriteLine("Невірний варіант для цього завдання.");
+            Console.WriteLine("Невірний вибір.");
+            return;
         }
+
+        // Створення студентів та викладачів
+        Student student = factory.CreateStudent();
+        Teacher teacher = factory.CreateTeacher();
+
+        // Використовуємо створених студентів та викладачів
+        student.Study();
+        teacher.Teach();
     }
 }
